@@ -1,0 +1,59 @@
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+* {
+    margin: 0;
+}
+
+:root {
+    --blue: #1E73BE;
+    --black: #333333;
+    --light: #E0E0E0;
+    --white: #fff;
+}
+
+body {
+    font-size: 16px;
+}
+
+a {
+    color: var(--blue);
+    text-decoration: none;
+}
+
+.container {
+    max-width: 1200px;
+}
+
+.bg-settings {
+    background-color: #F0F0F0;
+}
+
+input[type="text"],
+textarea.form-control {
+    border-radius: 0;
+}
+
+.btn.btn-primary {
+    border-radius: 4px;
+    background-color: var(--blue);
+}
+
+.nav-pills .nav-link.active {
+    border-radius: 4px;
+    background-color: var(--black);
+}
+
+.nav-pills .nav-link:not(.active) {
+    border-radius: 4px;
+    background-color: var(--light);
+    color: var(--white);
+}
+
+.table-wrapper {
+    max-height: 800px;
+    overflow-y: auto;
+}

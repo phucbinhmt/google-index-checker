@@ -1,10 +1,267 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="vi">
+
 <head>
-    <title>Web Core</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>Google index checker</title>
+    <!-- Required meta tags -->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+
+    <!-- Bootstrap CSS v5.2.1 -->
+    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet" />
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet" />
 </head>
+
 <body>
-    <h1>Hello from Flask Web Core!</h1>
+    <header>
+        <!-- place navbar here -->
+    </header>
+    <main>
+        <div class="container my-5 border p-4 rounded shadow">
+            <div class="row justify-content-center align-items-center g-2">
+                <div class="card text-start border-0">
+                    <div class="card-body p-0">
+                        <h1 class="card-title fs-2 mb-4 fw-bold">Công cụ kiểm tra chỉ mục của Google (Google index
+                            checker)
+                        </h1>
+                        <p class="card-text"><a class="fw-bold" href="/">Google Index Checker</a> là công cụ giúp kiểm
+                            tra xem trang web
+                            hoặc URL cụ thể
+                            đã được Google lập chỉ mục hay chưa. Công cụ này hỗ trợ webmaster, SEOer theo dõi tình trạng
+                            index của website, từ đó tối ưu hóa nội dung và cải thiện thứ hạng trên công cụ tìm kiếm.
+                            Lưu ý: Công cụ được thiết kế để sử dụng trên máy tính, trên mobile vẫn dùng được nhưng sẽ bị
+                            vỡ giao diện.</p>
+                        <p>API Key Test: e5da88d666msh028a943eed5fa00p17c790jsnd9bd19eb0264</p>
+                    </div>
+                </div>
+
+            </div>
+            <div class="row justify-content-center align-items-start g-5 p-4">
+                <div class="col-4 p-3 pb-5 bg-settings">
+                    <h4 class="mb-4">Settings</h4>
+                    <form class="row g-3">
+                        <div class="mb-3">
+                            <label for="apiKey" class="form-label">API key:</label>
+                            <input type="text" class="form-control" id="apiKeyInput">
+                        </div>
+                        <div class="col-12">
+                            <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
+                                <li class="nav-item w-50 px-2" role="presentation">
+                                    <button class="nav-link w-100 active" id="text-input-tab" data-bs-toggle="pill"
+                                        data-bs-target="#text-input" type="button" role="tab" aria-controls="text-input"
+                                        aria-selected="true">Text Input</button>
+                                </li>
+                                <li class="nav-item w-50 px-2" role="presentation">
+                                    <button class="nav-link w-100" id="csv-file-tab" data-bs-toggle="pill"
+                                        data-bs-target="#csv-file" type="button" role="tab" aria-controls="csv-file"
+                                        aria-selected="false">CSV
+                                        File</button>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="col-12">
+                            <div class="tab-content" id="pills-tabContent">
+                                <div class="tab-pane fade show active" id="text-input" role="tabpanel"
+                                    aria-labelledby="text-input-tab">
+                                    <div class="mb-3">
+                                        <label for="textInput" class="form-label">Enter URLs (one per
+                                            line):</label>
+                                        <textarea class="form-control" id="textInput" rows="10"></textarea>
+                                    </div>
+                                </div>
+                                <div class="tab-pane fade" id="csv-file" role="tabpanel" aria-labelledby="csv-file-tab">
+                                    <div class="mb-3">
+                                        <label for="fileInput" class="form-label">Upload CSV file containing
+                                            URLs:</label>
+                                        <input class="form-control" type="file" id="fileInput" accept=".csv">
+                                        <p class="small">CSV file should have URLs in the first column</p>
+                                    </div>
+                                </div>
+                                <div class="tab-pane fade" id="pills-contact" role="tabpanel"
+                                    aria-labelledby="pills-contact-tab">3</div>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Check mode:</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="modeCheck" value="1"
+                                    id="radUsingSite" checked>
+                                <label class="form-check-label" for="radUsingSite">
+                                    Using the “site:”
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="modeCheck" value="2"
+                                    id="radPlainUrl">
+                                <label class="form-check-label" for="radPlainUrl">
+                                    Using plain URL
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <button id="btnStart" type="button" class="btn btn-primary w-100">Start</button>
+                        </div>
+                        <div class="col-12">
+                            <button id="btnCopy" type="button" class="btn btn-primary w-100">Copy Results</button>
+                        </div>
+                        <div class="col-12">
+                            <button id="btnDownload" type="button" class="btn btn-primary w-100">Download CSV</button>
+                        </div>
+                    </form>
+                </div>
+                <div class="col-8 p-3">
+                    <div class="row">
+                        <div class="col-3">
+                            <h4 class="mb-4">Results</h4>
+                        </div>
+                        <div class="col-9 d-flex justify-content-end align-items-center">
+                            <p id="resultInfo" class="fw-bold">Indexed: 0 | No Indexed: 0 | Error: 0</p>
+                        </div>
+                    </div>
+                    <div class="table-wrapper">
+                        <table id="resultTable" class="table table-hover table-striped table-bordered">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th class="col-10">URL</th>
+                                    <th class="col-12">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>https://amthucbamien.edu.vn/nha-toi-ba-doi-bi-tri-chia-se-phuong-phap-chua-benh.t48556.html
+                                    </td>
+                                    <td class="text-success">Indexed</td>
+                                </tr>
+                                <tr>
+                                    <td>https://amthucbamien.edu.vn/nha-toi-ba-doi-bi-tri-chia-se-phuong-phap-chua-benh.t48556.html
+                                    </td>
+                                    <td class="text-success">Indexed</td>
+                                </tr>
+                                <tr>
+                                    <td>https://amthucbamien.edu.vn/nha-toi-ba-doi-bi-tri-chia-se-phuong-phap-chua-benh.t48556.html
+                                    </td>
+                                    <td class="text-success">Indexed</td>
+                                </tr>
+                                <tr>
+                                    <td>https://amthucbamien.edu.vn/nha-toi-ba-doi-bi-tri-chia-se-phuong-phap-chua-benh.t48556.html
+                                    </td>
+                                    <td class="text-success">Indexed</td>
+                                </tr>
+                                <tr>
+                                    <td>https://amthucbamien.edu.vn/nha-toi-ba-doi-bi-tri-chia-se-phuong-phap-chua-benh.t48556.html
+                                    </td>
+                                    <td class="text-success">Indexed</td>
+                                </tr>
+                                <tr>
+                                    <td>https://amthucbamien.edu.vn/nha-toi-ba-doi-bi-tri-chia-se-phuong-phap-chua-benh.t48556.html
+                                    </td>
+                                    <td class="text-success">Indexed</td>
+                                </tr>
+                                <tr>
+                                    <td>https://amthucbamien.edu.vn/nha-toi-ba-doi-bi-tri-chia-se-phuong-phap-chua-benh.t48556.html
+                                    </td>
+                                    <td class="text-success">Indexed</td>
+                                </tr>
+                                <tr>
+                                    <td>https://amthucbamien.edu.vn/nha-toi-ba-doi-bi-tri-chia-se-phuong-phap-chua-benh.t48556.html
+                                    </td>
+                                    <td class="text-success">Indexed</td>
+                                </tr>
+                                <tr>
+                                    <td>https://amthucbamien.edu.vn/nha-toi-ba-doi-bi-tri-chia-se-phuong-phap-chua-benh.t48556.html
+                                    </td>
+                                    <td class="text-success">Indexed</td>
+                                </tr>
+                                <tr>
+                                    <td>https://amthucbamien.edu.vn/nha-toi-ba-doi-bi-tri-chia-se-phuong-phap-chua-benh.t48556.html
+                                    </td>
+                                    <td class="text-success">Indexed</td>
+                                </tr>
+                                <tr>
+                                    <td>https://amthucbamien.edu.vn/nha-toi-ba-doi-bi-tri-chia-se-phuong-phap-chua-benh.t48556.html
+                                    </td>
+                                    <td class="text-success">Indexed</td>
+                                </tr>
+                                <tr>
+                                    <td>https://amthucbamien.edu.vn/nha-toi-ba-doi-bi-tri-chia-se-phuong-phap-chua-benh.t48556.html
+                                    </td>
+                                    <td class="text-success">Indexed</td>
+                                </tr>
+                                <tr>
+                                    <td>https://amthucbamien.edu.vn/nha-toi-ba-doi-bi-tri-chia-se-phuong-phap-chua-benh.t48556.html
+                                    </td>
+                                    <td class="text-success">Indexed</td>
+                                </tr>
+                                <tr>
+                                    <td>https://amthucbamien.edu.vn/nha-toi-ba-doi-bi-tri-chia-se-phuong-phap-chua-benh.t48556.html
+                                    </td>
+                                    <td class="text-success">Indexed</td>
+                                </tr>
+                                <tr>
+                                    <td>https://amthucbamien.edu.vn/nha-toi-ba-doi-bi-tri-chia-se-phuong-phap-chua-benh.t48556.html
+                                    </td>
+                                    <td class="text-success">Indexed</td>
+                                </tr>
+                                <tr>
+                                    <td>https://amthucbamien.edu.vn/nha-toi-ba-doi-bi-tri-chia-se-phuong-phap-chua-benh.t48556.html
+                                    </td>
+                                    <td class="text-success">Indexed</td>
+                                </tr>
+                                <tr>
+                                    <td>https://amthucbamien.edu.vn/nha-toi-ba-doi-bi-tri-chia-se-phuong-phap-chua-benh.t48556.html
+                                    </td>
+                                    <td class="text-success">Indexed</td>
+                                </tr>
+                                <tr>
+                                    <td>https://amthucbamien.edu.vn/nha-toi-ba-doi-bi-tri-chia-se-phuong-phap-chua-benh.t48556.html
+                                    </td>
+                                    <td class="text-success">Indexed</td>
+                                </tr>
+                                <tr>
+                                    <td>https://amthucbamien.edu.vn/nha-toi-ba-doi-bi-tri-chia-se-phuong-phap-chua-benh.t48556.html
+                                    </td>
+                                    <td class="text-success">Indexed</td>
+                                </tr>
+                                <tr>
+                                    <td>https://amthucbamien.edu.vn/nha-toi-ba-doi-bi-tri-chia-se-phuong-phap-chua-benh.t48556.html
+                                    </td>
+                                    <td class="text-success">Indexed</td>
+                                </tr>
+                                <tr>
+                                    <td>https://amthucbamien.edu.vn/nha-toi-ba-doi-bi-tri-chia-se-phuong-phap-chua-benh.t48556.html
+                                    </td>
+                                    <td class="text-success">Indexed</td>
+                                </tr>
+                                <tr>
+                                    <td>https://amthucbamien.edu.vn/nha-toi-ba-doi-bi-tri-chia-se-phuong-phap-chua-benh.t48556.html
+                                    </td>
+                                    <td class="text-success">Indexed</td>
+                                </tr>
+                                <tr>
+                                    <td>https://amthucbamien.edu.vn/nha-toi-ba-doi-bi-tri-chia-se-phuong-phap-chua-benh.t48556.html
+                                    </td>
+                                    <td class="text-success">Indexed</td>
+                                </tr>
+                                <tr>
+                                    <td>https://amthucbamien.edu.vn/nha-toi-ba-doi-bi-tri-chia-se-phuong-phap-chua-benh.t48556.html
+                                    </td>
+                                    <td class="text-success">Indexed</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <footer>
+        <!-- place footer here -->
+    </footer>
+    <!-- Bootstrap JavaScript Libraries -->
+    <script src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/popper.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 </body>
+
 </html>
