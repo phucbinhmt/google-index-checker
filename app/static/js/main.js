@@ -14,7 +14,11 @@ btnStart.on('click', function () {
     const apiKey = apiKeyInput.val().trim()
 
     if (!apiKey) {
-        alert('Missing api key!');
+        Swal.fire({
+            title: 'Thiếu API Key!',
+            text: 'Vui lòng nhập API key trước khi tiếp tục.',
+            icon: 'error',
+        });
         return;
     }
 
@@ -28,9 +32,28 @@ btnStart.on('click', function () {
         const cleanLines = lines.map(line => line.trim()).filter(line => line !== "");
         const uniqueLines = [...new Set(cleanLines)];
 
+        if (uniqueLines.length == 0) {
+            Swal.fire({
+                title: 'Chưa nhập URLs!',
+                text: 'Vui lòng nhập URLs để kiểm tra.',
+                icon: 'error'
+            });
+            return;
+        }
+
         formData.append('urls', JSON.stringify(uniqueLines));
     } else if (activeTabId === "csv-file-tab") {
         const file = fileInput[0].files[0];
+
+        if (!file) {
+            Swal.fire({
+                title: 'Chưa chọn file!',
+                text: 'Vui lòng chọn một file trước khi gửi.',
+                icon: 'error'
+            });
+            return;
+        }
+
         formData.append("file", file);
     }
 
@@ -42,9 +65,32 @@ btnStart.on('click', function () {
         contentType: false,
         beforeSend: function () {
             resultTable.empty();
+            Swal.fire({
+                title: 'Đang xử lý...',
+                text: 'Vui lòng đợi một chút nhé!',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
         },
         success: function (response) {
             renderResultsToTable(response);
+            Swal.close();
+            Swal.fire({
+                title: 'Thành công!',
+                text: 'Dữ liệu đã được xử lý.',
+                icon: 'success',
+                timer: 1500,
+            });
+        },
+        error: function (xhr) {
+            Swal.close();
+            Swal.fire({
+                title: 'Lỗi!',
+                text: 'Đã xảy ra lỗi khi xử lý.',
+                icon: 'error'
+            });
         }
     });
 });
@@ -58,9 +104,18 @@ btnCopy.on('click', function () {
         output += `${url}\t${status}\n`;
     });
     navigator.clipboard.writeText(output).then(() => {
-        alert("Copied! You can paste it into Google Sheets.");
+        Swal.fire({
+            title: 'Đã sao chép!',
+            text: 'Nội dung đã được copy vào clipboard.',
+            icon: 'success',
+            timer: 1500,
+        });
     }).catch(err => {
-        alert("Failed to copy: " + err);
+        Swal.fire({
+            title: 'Thất bại!',
+            text: 'Không thể sao chép. Trình duyệt có thể không hỗ trợ.',
+            icon: 'error'
+        });
     });
 });
 
@@ -110,6 +165,6 @@ function renderResultsToTable(data) {
         `;
         resultTable.append(row);
     }
-    const info = `Indexed: ${countTrue} | No Indexed: ${countFalse} | Error: ${countNull}`;
+    const info = `Indexed: ${countTrue} | Not Indexed: ${countFalse} | Error: ${countNull}`;
     resultInfo.text(info);
 }
